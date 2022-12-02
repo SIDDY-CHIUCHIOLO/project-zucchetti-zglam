@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/alasql@2"></script>
+    <script src="echarts.min.js"></script>
+    <script src="alasql.min.js"></script>
+
+    <title>Z-GLAM</title>
+</head>
+<body>
+    <main style="position: relitive;">
+        <div class="container-fluid" style="position: fixed; height: 100vh; padding: 20px; display: flex; justify-content: space-between;">
+            <div>
+                <div class="d-flex flex-column justify-content-around" style="height: 90vh;">
+                    <a style="color:aliceblue;font-size: 20px;font-weight: 900;text-decoration: none;;text-shadow: 2px 0px 2px black;" href="#sezione1a">PROVINCIE</a>
+                    <a style="color:yellow;font-size: 15px;font-weight: 900;text-decoration: none;text-shadow: 2px 0px 2px black;" href="#sezione1b">GRAFICO</a>
+                    <a style="color:aliceblue;font-size: 20px;font-weight: 900;text-decoration: none;text-shadow: 2px 0px 2px black;" href="#sezione2a">PUNTO VENDITA</a>
+                    <a style="color:yellow;font-size: 15px;font-weight: 900;text-decoration: none;text-shadow: 2px 0px 2px black;" href="#sezione2b">GRAFICO</a>
+                    <a style="color:aliceblue;font-size: 20px;font-weight: 900;text-decoration: none;text-shadow: 2px 0px 2px black;" href="#sezione3a">CATEGORIE</a>
+                    <a style="color:yellow;font-size: 15px;font-weight: 900;text-decoration: none;text-shadow: 2px 0px 2px black;" href="#sezione3b">GRAFICO</a>
+                    <a style="color:aliceblue;font-size: 20px;font-weight: 900;text-decoration: none;text-shadow: 2px 0px 2px black;" href="#sezione4a">MESE</a>
+                    <a style="color:yellow;font-size: 15px;font-weight: 900;text-decoration: none;text-shadow: 2px 0px 2px black;" href="#sezione4b">GRAFICO</a>
+                    <a style="color:aliceblue;font-size: 20px;font-weight: 900;text-decoration: none;text-shadow: 2px 0px 2px black;" href="#sezione5a">TESSERE</a>
+                    <a style="color:yellow;font-size: 15px;font-weight: 900;text-decoration: none;text-shadow: 2px 0px 2px black;" href="#sezione5b">GRAFICO</a>
+                </div>
+            </div>
+        </div>
+        
+
+
+        <!-- sql vendite retail e online -->
+        <section style="background-color: rgb(204, 232, 165); height: 100vh;">
+            <h1 style="text-align: center; padding: 50px 0;">QUERY PER VISUALIZZAZIONE VENDITE <br> RETAIL E ONLINE</h1>
+            <div style="width:100vh;height:70vh;margin: auto; padding-top: 10vh;">
+                <p class="bg-white p-5 rounded shadow-lg">
+                    // VENDITE TOTALI E QUANTITA SCONTI PER (VENDITE RETAIL) <br>
+                    console.table(alasql('SELECT regione, provincia, categoria, articolo, COUNT(articolo) as venditeTotRetail, SUM(sconto) as scontiTotRetail FROM ordiniRetail GROUP BY regione, provincia, categoria, articolo, sconto  ORDER BY regione')) <br>
+                    <br>
+                    // VENDITE TOTALI E QUANTITA SCONTI PER (VENDITE ONLINE) <br>
+                    console.table(alasql('SELECT regione, provincia, categoria, articolo, COUNT(articolo) as venditeTotOnline, SUM(sconto) as scontiTotOnline FROM ordiniOnline GROUP BY regione, provincia, categoria, articolo, sconto  ORDER BY regione')) <br>
+                </p>
+            </div>
+        </section>
+        
+        <!-- sql vendite per provincia -->
+        <section id="sezione1a" style="background-color: rgb(232, 165, 165); height: 100vh;">
+            <a href="1"></a>
+            <h1 style="text-align: center; padding: 50px 0;">QUERY PER VISUALIZZAZIONE VENDITE <br> PER PROVINCIA</h1>
+            <div style="width:100vh;height:70vh;margin: auto; padding-top: 15vh;">
+                <p class="bg-white p-5 rounded-pill shadow-lg">
+                    alasql('CREATE TABLE venditeProvincia')<br>
+                    alasql('INSERT INTO venditeProvincia SELECT *  FROM ordini')<br>
+                    let venditeProvincia = alasql('SELECT provincia, COUNT(articolo) as venditeProvincia from ordini GROUP BY provincia ORDER BY provincia')<br>
+                    console.table(venditeProvincia)
+                </p>
+            </div>
+        </section>
+
+        <!-- vendite per provincia -->
+        <section id="sezione1b" style="background-color: rgb(0, 229, 255); height: 100vh;">
+            <a href="1"></a>
+            <h1 style="text-align: center; padding: 50px 0;">VISUALIZZAZIONE VENDITE <br> PER PROVINCIA</h1>
+            <div id="vendite_provincia" style="width:100vh;height:70vh;margin: auto;"></div>
+        </section>
+
+
+        <!-- sql punto vendita -->
+        <section id="sezione2a" style="background-color: rgb(232, 165, 165); height: 100vh;">
+            <a href="1"></a>
+            <h1 style="text-align: center; padding: 50px 0;">QUERY PER VISUALIZZAZIONE PUNTO VENDITA <br> PIU' REDDITIZIO</h1>
+            <div style="width:100vh;height:70vh;margin: auto;">
+                <p class="bg-white p-5 rounded shadow-lg">
+                    alasql('CREATE TABLE puntiV')<br>
+                    alasql('INSERT INTO puntiV SELECT *  FROM ?', [venditeRetail])<br>
+                    let puntiVendita = alasql('SELECT * FROM puntiV');<br>
+                    let puntiV = [];<br>
+                    puntiVendita.forEach((element) => {<br>
+
+                        arr = {<br>
+                            regione: element.posizione.regione,<br>
+                            provincia: element.posizione.provincia ,<br>
+                            punto_vendita: element.posizione.punto_vendita,<br>
+                            prezzo_finale: element.prezzo_finale,<br>
+                        }<br>
+                        puntiV.push(arr)<br>
+                    });<br>
+                    alasql('CREATE TABLE pV')<br>
+                    alasql('INSERT INTO pV SELECT *  FROM ?', [puntiV])<br>
+                    console.table(alasql('SELECT regione, provincia, punto_vendita, SUM(prezzo_finale) as guadagno FROM pV GROUP BY punto_vendita, provincia,regione ORDER BY guadagno DESC'))
+
+                </p>
+            </div>
+        </section>
+
+
+        <!-- punto vendita più redditizio -->
+        <section id="sezione2b" style="background-color: rgb(167, 245, 150); height: 100vh;">
+            <h1 style="text-align: center; padding: 50px 0;">VISUALIZZAZIONE PUNTO VENDITA <br> PIU' REDDITIZIO</h1>
+            <div id="punto_vendita" style="width:100vh;height:70vh;margin: auto;"></div>
+        </section>
+
+        <!-- sql vendite per categoria -->
+        <section id="sezione3a" style="background-color: rgb(232, 165, 165); height: 100vh;">
+            <a href="1"></a>
+            <h1 style="text-align: center; padding: 50px 0;">QUERY PER VISUALIZZAZIONE VENDITE <br> PER CATEGORIA</h1>
+            <div style="width:100vh;height:70vh;margin: auto; padding-top: 10vh;">
+                <p class="bg-white p-5 rounded-pill shadow-lg">
+                    alasql('CREATE TABLE venditeCategoria')<br>
+                    alasql('INSERT INTO venditeCategoria SELECT *  FROM ordini')<br>
+                    let venditeCategoria = alasql('SELECT categoria, COUNT(articolo) as venditeCategoria from ordini GROUP BY categoria ORDER BY venditeCategoria DESC')<br>
+                    console.table(venditeCategoria)<br>
+                </p>
+            </div>
+        </section>
+        
+
+        <!-- vendite per categorie -->
+        <section id="sezione3b" style="background-color: rgb(245, 243, 150); height: 100vh;">
+            <h1 style="text-align: center; padding: 50px 0;">VISUALIZZAZIONE VENDITE <br> PER CATEGORIA</h1>
+            <div id="vendite_categoria" style="width:100vh;height:70vh;margin: auto;"></div>
+        </section>
+
+        <!-- sql vendite per mese piu proficuo -->
+        <section id="sezione4a" style="background-color: rgb(232, 165, 165); height: 100vh;">
+            <a href="1"></a>
+            <h1 style="text-align: center; padding: 50px 0;">QUERY PER VISUALIZZAZIONE MESE <br> PIU' PROFICUO</h1>
+            <div style="width:100vh;height:70vh;margin: auto;">
+                <p class="bg-white p-5 rounded shadow-lg">
+                    alasql('CREATE TABLE mesi') <br>
+                    alasql('INSERT INTO mesi SELECT *  FROM ?', [venditeComplessive]) <br>
+                    let resMesi = alasql('SELECT * FROM mesi'); <br>
+                    let mesiProficui = []; <br>
+                    resMesi.forEach((element) => { <br>
+                        arr = { <br>
+                            mese: element.data_acquisto.mese ,<br>
+                            prezzo_finale: element.prezzo_finale,<br>
+                        }<br>
+                        mesiProficui.push(arr)<br>
+                    });<br>
+
+                    alasql('CREATE TABLE mP')<br>
+                    alasql('INSERT INTO mP SELECT *  FROM ?', [mesiProficui])<br>
+                    let venditaMese = alasql('SELECT mese, SUM(prezzo_finale) as guadagno FROM mP GROUP BY mese')<br>
+                    console.table(venditaMese)<br>
+                </p>
+            </div>
+        </section>
+
+        <!-- vendite per mese -->
+        <section id="sezione4b" style="background-color: rgb(245, 188, 150); height: 100vh;">
+            <h1 style="text-align: center; padding: 50px 0;">VISUALIZZAZIONE MESE PIU' PROFICUO</h1>
+            <div id="vendite_mese" style="width:100vh;height:70vh;margin: auto;"></div>
+        </section>
+
+        <!-- sql vendite per tessere -->
+        <section id="sezione5a" style="background-color: rgb(232, 165, 165); height: 100vh;">
+            <a href="1"></a>
+            <h1 style="text-align: center; padding: 50px 0;">QUERY PER VISUALIZZAZIONE TESSERE <br> TOTALI SU TOTALI VENDITE</h1>
+            <div style="width:100vh;height:70vh;margin: auto; padding-top: 15vh;">
+                <p class="bg-white p-5 rounded-pill shadow-lg">
+                    alasql('CREATE TABLE tessere') <br>
+                    alasql('INSERT INTO tessere SELECT *  FROM ?', [venditeComplessive]) <br>
+                    let tessereFedelta = alasql('SELECT COUNT(tessera_fedelta) as totTessere from tessere WHERE tessera_fedelta > 0 GROUP BY totTessere') <br>
+                    let ordiniTot = venditeOnline.length + venditeRetail.length <br>
+                    console.table(tessereFedelta)
+                </p>
+            </div>
+        </section>
+
+        <!-- totale tessere -->
+        <section id="sezione5b" style="background-color: rgb(214, 185, 243); height: 100vh;">
+            <h1 style="text-align: center; padding: 50px 0;">VISUALIZZAZIONE TESSERE TOTALI</h1>
+            <div id="tessere_totali" style="width:100vh;height:70vh;margin: auto;"></div>
+        </section>
+    </main>
+    <script type="text/javascript" src="main.js"></script>
+</body>
+</html>
+
+
